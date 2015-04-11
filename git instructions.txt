@@ -1,0 +1,10 @@
+To add a new file: git add <filename>
+
+To commit: git commit -av
+    First line is the commit title
+    Second line is blank
+    3rd line on is the description
+
+To pull: git pull
+
+To push: git push
