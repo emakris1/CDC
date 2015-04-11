@@ -8,3 +8,7 @@ To commit: git commit -av
 To pull: git pull
 
 To push: git push
+
+To view what files have changed: git status
+
+To view the commit history: git log
