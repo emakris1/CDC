@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1008</width>
+    <height>686</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CDC: Command Distribution Center</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPlainTextEdit" name="plainTextEditMissionStatus">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>30</y>
+      <width>561</width>
+      <height>571</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+    <property name="plainText">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelMissionStatus">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>10</y>
+      <width>561</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mission Status</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCommandConsole">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>610</y>
+      <width>561</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Enter Command</string>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="plainTextEditTelemetry">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>360</y>
+      <width>400</width>
+      <height>300</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelVideoStream">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>401</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Live Video Stream</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelTelemetry">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>340</y>
+      <width>401</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Telemetry</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditCommandConsole">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>630</y>
+      <width>561</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QWidget" name="widgetVideoStream" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>400</width>
+      <height>300</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
