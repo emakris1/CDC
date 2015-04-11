@@ -51,7 +51,7 @@ while current_seq <= MAX_SEQ:
         print('Image downloaded succeeded!')
         imgs.append(img)
     else:
-        print('Image download failed.')
+        print('Image download failed. Abort mission.')
         imgs.append(None)
 
     mvlnk.param_fetch_one(name='MISSION_CURRENT')
@@ -63,4 +63,12 @@ while current_seq <= MAX_SEQ:
         current_seq = msg_seq.seq
         print 'Current Sequence: ' + str(msg_seq.seq)
 
- 
+imgfound = 0
+for img in image:
+    if(det.detect(img)):
+        print('Object detected at waypoint ' + ' ' + str(image.index(img) + 1) + '!')
+        imgfound = 1
+        break
+
+if(imgfound == 0)
+    print('Object not detected.')
