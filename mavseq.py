@@ -5,8 +5,8 @@ from pymavlink import mavutil
 from GoProController import GoProController
 from Detector import Detector
 
-MIN_SEQ = 2
-MAX_SEQ = 4
+MIN_WP_SEQ = 2
+MAX_WP_SEQ = 4
 
 # open gopro connection
 gpc = GoProController(device_name='wlan1')
@@ -25,15 +25,22 @@ msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True, timeout=1)
 current_seq = msg_seq.seq
 print 'Starting Sequence Number: ' + str(current_seq)
 
-# loop until the sequence number increments past the takeoff sequence
-while current_seq < MIN_SEQ:
+# loop until we've made it past the takeoff sequence
+in_takeoff_seq = True
+while in_takeoff_seq:
     mvlnk.param_fetch_one(name='MISSION_CURRENT')
     msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True, timeout=1)
     current_seq = msg_seq.seq
-    print 'Waiting until waypoint sequence is reached... Current Sequence: ' + str(current_seq)
+    if current_seq < MIN_WP_SEQ:
+        print 'Waiting until takeoff has finished... Current Sequence: ' + str(current_seq)
+    else:
+        in_takeoff_seq = False
+        print 'Takeoff finished! Current Sequence: ' + str(current_seq)
 
-# loop until the sequence number increments to the landing sequence
-while current_seq <= MAX_SEQ:
+# loop through waypoint sequences until we reach the landing sequence
+failed = False
+in_waypoint_seq = True
+while not failed and in_waypoint_seq:
    # wait until we've reached the waypoint
     mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
     msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True, timeout=1)
@@ -48,27 +55,37 @@ while current_seq <= MAX_SEQ:
     time.sleep(3)
     img = gpc.getImage('SARSGoPro', 'sarsgopro')
     if img:
-        print('Image download succeeded!')
         imgs.append(img)
+        print('Image download succeeded!')
     else:
+        failed = True
         print('Image download failed. Abort mission.')
-        imgs.append(None)
-
-    mvlnk.param_fetch_one(name='MISSION_CURRENT')
-    msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True, timeout=1)
 
     # wait for the sequence number to increment
-    while current_seq == msg_seq:
-    if current_seq != msg_seq.seq:
-        current_seq = msg_seq.seq
-        print 'Current Sequence: ' + str(msg_seq.seq)
+    incremented = False
+    while not incremented:
+        mvlnk.param_fetch_one(name='MISSION_CURRENT')
+        msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True, timeout=1)
+        if current_seq == msg_seq.seq:
+            print 'Waiting for sequence number to increment...'
+        else:
+            current_seq = msg_seq.seq
+            incremented = True
+            print 'Sequence number incremented! Current Sequence Number: ' + str(current_seq)
 
-imgfound = 0
-for img in imgs:
-    if(det.detect(img)):
-        print('Object detected at waypoint ' + str(imgs.index(img) + 1) + '!')
-        imgfound = 1
-        break
+    if current_seq > MAX_WP_SEQ:
+        in_waypoint_seq = False
+        print 'All waypoints visited!'
 
-if(imgfound == 0)
-    print('Object not detected.')
+# run the object detection the images
+if not failed:
+    print 'Running object detection..'
+    found = False
+    for img in imgs:
+        if(det.detect(img)):
+            found = True
+            print('Object detected at waypoint ' + str(imgs.index(img) + 1) + '!')
+            break
+
+    if not found:
+        print('Object not detected.')
