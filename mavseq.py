@@ -11,7 +11,7 @@ MAX_SEQ = 4
 # open gopro connection
 gpc = GoProController(device_name='wlan1')
 gpc.connect('SARSGoPro', 'sarsgopro')
-# det = Detector()
+det = Detector()
 
 # open mavlink connection
 mvlnk = mavutil.mavlink_connection(device='/dev/ttyUSB0', baud=57600)
@@ -48,7 +48,7 @@ while current_seq <= MAX_SEQ:
     time.sleep(3)
     img = gpc.getImage('SARSGoPro', 'sarsgopro')
     if img:
-        print('Image downloaded succeeded!')
+        print('Image download succeeded!')
         imgs.append(img)
     else:
         print('Image download failed. Abort mission.')
@@ -64,9 +64,9 @@ while current_seq <= MAX_SEQ:
         print 'Current Sequence: ' + str(msg_seq.seq)
 
 imgfound = 0
-for img in image:
+for img in imgs:
     if(det.detect(img)):
-        print('Object detected at waypoint ' + ' ' + str(image.index(img) + 1) + '!')
+        print('Object detected at waypoint ' + str(imgs.index(img) + 1) + '!')
         imgfound = 1
         break
 
