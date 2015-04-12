@@ -1,14 +1,5 @@
 # Class for detecting white objects in images
 
-# Test Procedure:
-# from Detector import Detector
-# c = Detector()
-# test = c.detect(<path_to_image>)
-# if test:
-#       print("The image contains the object!")
-# else:
-#       print("The image does not contain the object.")
-
 from PIL import Image
 
 class Detector:
