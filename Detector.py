@@ -7,6 +7,7 @@ class Detector:
         def detect(self, image):
                 pix = image.load()
                 size = image.size
+                print(str(size))
 
                 # Check image for ten adjacent pixels whose rgb values all average out above 200.
                 # Only checks horizontally adjacent pixels, not vertically or diagonally adjacent ones.
