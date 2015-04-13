@@ -1,5 +1,6 @@
 from GoProController import GoProController
 from Detector import Detector
+from PIL import Image
 
 gpc = GoProController(device_name='wlan1')
 gpc.connect('SARSGoPro', 'sarsgopro')

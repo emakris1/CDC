@@ -4,6 +4,7 @@ import time
 from pymavlink import mavutil
 from GoProController import GoProController
 from Detector import Detector
+from PIL import Image
 
 MIN_WP_SEQ = 2
 MAX_WP_SEQ = 4
@@ -55,7 +56,9 @@ while not failed and in_waypoint_seq:
     time.sleep(3)
     img = gpc.getImage('SARSGoPro', 'sarsgopro')
     if img:
-        imgs.append(img)
+        im = Image.open('image.png')
+        pix = im.load()
+        imgs.append(pix)
         print('Image download succeeded!')
     else:
         failed = True
@@ -81,10 +84,10 @@ while not failed and in_waypoint_seq:
 if not failed:
     print 'Running object detection..'
     found = False
-    for img in imgs:
-        if(det.detect(img)):
+    for pix in imgs:
+        if(det.detect(pix)):
             found = True
-            print('Object detected at waypoint ' + str(imgs.index(img) + 1) + '!')
+            print('Object detected at waypoint ' + str(imgs.index(pix) + 1) + '!')
             break
 
     if not found:

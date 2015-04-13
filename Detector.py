@@ -1,7 +1,5 @@
 # Class for detecting white objects in images
 
-from PIL import Image
-
 class Detector:
 
         def detect(self, pix):
