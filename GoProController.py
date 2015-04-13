@@ -407,6 +407,7 @@ class GoProController:
                     output = StringIO.StringIO()
                     image_name = 'image-' + time.strftime('%Y%m%d%H%M%S') + '.png'
                     image.save(image_name, format="PNG")
+                    image.save('image.png', format='PNG')
                     str = output.getvalue()
                     output.close()
                     

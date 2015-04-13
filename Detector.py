@@ -4,16 +4,12 @@ from PIL import Image
 
 class Detector:
 
-        def detect(self, image):
-                pix = image.load()
-                size = image.size
-                print(str(size))
-
+        def detect(self, pix):
                 # Check image for ten adjacent pixels whose rgb values all average out above 200.
                 # Only checks horizontally adjacent pixels, not vertically or diagonally adjacent ones.
-                for j in range(0,size[1]):
+                for j in range(0,240):
                     count = 0
-                    for i in range(0,size[0]):
+                    for i in range(0,432):
                         avg = (pix[i,j][0] + pix[i,j][1] + pix[i,j][2])/3
                         if avg > 200:
                             count += 1
