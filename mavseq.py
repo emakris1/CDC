@@ -6,10 +6,10 @@ from GoProController import GoProController
 from Detector import Detector
 
 MIN_WP_SEQ = 2
-MAX_WP_SEQ = 4
+MAX_WP_SEQ = 3
 
 # open gopro connection
-gpc = GoProController(device_name='wlan1')
+gpc = GoProController(device_name='wlan0')
 gpc.connect('SARSGoPro', 'sarsgopro')
 det = Detector()
 
@@ -21,7 +21,7 @@ imgs = []
 
 # fetch the initial sequence number
 mvlnk.param_fetch_one(name='MISSION_CURRENT')
-msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True, timeout=1)
+msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True)
 current_seq = msg_seq.seq
 print 'Starting Sequence Number: ' + str(current_seq)
 
@@ -29,7 +29,7 @@ print 'Starting Sequence Number: ' + str(current_seq)
 in_takeoff_seq = True
 while in_takeoff_seq:
     mvlnk.param_fetch_one(name='MISSION_CURRENT')
-    msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True, timeout=1)
+    msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True)
     current_seq = msg_seq.seq
     if current_seq < MIN_WP_SEQ:
         print 'Waiting until takeoff has finished... Current Sequence: ' + str(current_seq)
@@ -43,10 +43,10 @@ in_waypoint_seq = True
 while not failed and in_waypoint_seq:
    # wait until we've reached the waypoint
     mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
-    msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True, timeout=1)
+    msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True)
     while msg_nav.wp_dist > 0:
         mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
-        msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True, timeout=1)
+        msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True)
         print 'Waypoint Distance: ' + str(msg_nav.wp_dist)
     print 'Waypoint reached!'
 
@@ -65,7 +65,7 @@ while not failed and in_waypoint_seq:
     incremented = False
     while not incremented:
         mvlnk.param_fetch_one(name='MISSION_CURRENT')
-        msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True, timeout=1)
+        msg_seq = mvlnk.recv_match(type='MISSION_CURRENT', blocking=True)
         if current_seq == msg_seq.seq:
             print 'Waiting for sequence number to increment...'
         else:
