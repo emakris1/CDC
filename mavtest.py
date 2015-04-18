@@ -7,15 +7,15 @@ from Detector import Detector
 from PIL import Image
 
 MIN_WP_SEQ = 1
-MAX_WP_SEQ = 18
+MAX_WP_SEQ = 90
 
 # open gopro connection
-gpc = GoProController(device_name='wlan0')
+gpc = GoProController(device_name='wlan1')
 gpc.connect('SARSGoPro', 'sarsgopro')
 det = Detector()
 
 # open mavlink connection
-mvlnk = mavutil.mavlink_connection(device='/dev/ttyUSB1', baud=57600)
+mvlnk = mavutil.mavlink_connection(device='/dev/ttyUSB2', baud=57600)
 
 # create an array to store all pulled images
 imgs = []
@@ -46,7 +46,7 @@ while not failed and in_waypoint_seq:
     mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
     msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True)
 
-    if current_seq == 1 or current_seq == 10:
+    if current_seq == 2 or current_seq == 32 or current_seq == 62:
         while msg_nav.wp_dist > 0:
             mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
             msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True)
@@ -78,7 +78,7 @@ while not failed and in_waypoint_seq:
             incremented = True
             print 'Sequence number incremented! Current Sequence Number: ' + str(current_seq)
 
-    if current_seq > MAX_WP_SEQ:
+    if current_seq >= MAX_WP_SEQ:
         in_waypoint_seq = False
         print 'All waypoints visited!'
 
