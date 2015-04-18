@@ -26,7 +26,7 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
         self.isRunning = False
 
         # establish a connection the quadcopter
-        self.mvlnk = mavutil.mavlink_connection(device='/dev/ttyUSB0', baud=57600)
+        self.quad = mavutil.mavlink_connection(device='/dev/ttyUSB0', baud=57600)
 
         # set up the GoProController object used for pulling static images
         # Ethernet Adapter is wlan0; USB Wi-Fi Adapter is wlan1
@@ -108,8 +108,8 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
             self.isPaused = True
         else:
             if self.mediaplayer.play() == -1:
-                # self.OpenURL('http://10.5.5.9:8080/live/amba.m3u8')
-                self.OpenURL('http://www.nasa.gov/multimedia/nasatv/NTV-Public-IPS.m3u8')
+                self.OpenURL('http://10.5.5.9:8080/live/amba.m3u8')
+                # self.OpenURL('http://www.nasa.gov/multimedia/nasatv/NTV-Public-IPS.m3u8')
                 return
             while not self.mediaplayer.is_playing():
                 self.mediaplayer.play()
@@ -163,11 +163,17 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
 
     def updateTelemetry(self):
         """updates the quadcopter and rover telemetry information"""
-        self.mvlnk.param_fetch_one('HEARTBEAT')
-        msg_hrt = self.mvlnk.recv_match(type='HEARTBEAT', blocking=False)
-        if msg_hrt is not None:
-            self.hrtCount += 1
-        self.plainTextEditTelemetry.setPlainText('Heartbeats: ' + str(self.hrtCount))
+        self.quad.gpi = self.quad.recv_match(type='GLOBAL_POSITION_INT', blocking=False)
+        if self.quad.gpi is not None:
+            self.plainTextEditTelemetry.setPlainText('')
+            self.plainTextEditTelemetry.appendPlainText('Latitude:\t\t' + str(self.quad.gpi.lat / 10000000.0))
+            self.plainTextEditTelemetry.appendPlainText('Longitude:\t\t' + str(self.quad.gpi.lon / 10000000.0))
+            self.plainTextEditTelemetry.appendPlainText('Heading:\t\t' + str(self.quad.gpi.hdg / 100.0))
+            # self.plainTextEditTelemetry.setPlainText('Dist to WP:\t\t' + self.quad.gpi.dist_wp)
+            self.plainTextEditTelemetry.appendPlainText('Altitude:\t\t' + str(self.quad.gpi.relative_alt / 1000.0))
+            self.plainTextEditTelemetry.appendPlainText('Velocity (X):\t' + str(self.quad.gpi.vx))
+            self.plainTextEditTelemetry.appendPlainText('Velocity (Y):\t' + str(self.quad.gpi.vy))
+            self.plainTextEditTelemetry.appendPlainText('Velocity (Z):\t' + str(self.quad.gpi.vz))
 
     def processCmd(self):
         cmd = self.lineEditCommandConsole.text()
@@ -194,7 +200,7 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
         self.isRunning = True
         self.plainTextEditMissionStatus.appendPlainText('Initiating Mission...')
         while True:
-            msg_nav = self.mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True, timeout=1)
+            msg_nav = self.quad.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True, timeout=1)
             self.plainTextEditMissionStatus.appendPlainText('Waypoint Distance: ' + str(msg_nav.wp_dist))
             QtGui.qApp.processEvents()
         self.isRunning = False
@@ -203,5 +209,5 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     cdc = cdc()
     cdc.show()
-    #cdc.gpc.connect('SARSGoPro', 'sarsgopro')
+    # cdc.gpc.connect('SARSGoPro', 'sarsgopro')
     sys.exit(app.exec_())

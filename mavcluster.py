@@ -6,16 +6,16 @@ from GoProController import GoProController
 from Detector import Detector
 from PIL import Image
 
-MIN_WP_SEQ = 2
-MAX_WP_SEQ = 3
+MIN_WP_SEQ = 1
+MAX_WP_SEQ = 90
 
 # open gopro connection
-gpc = GoProController(device_name='wlan0')
+gpc = GoProController(device_name='wlan1')
 gpc.connect('SARSGoPro', 'sarsgopro')
 det = Detector()
 
 # open mavlink connection
-mvlnk = mavutil.mavlink_connection(device='/dev/ttyUSB0', baud=57600)
+mvlnk = mavutil.mavlink_connection(device='/dev/ttyUSB2', baud=57600)
 
 # create an array to store all pulled images
 imgs = []
@@ -45,24 +45,26 @@ while not failed and in_waypoint_seq:
    # wait until we've reached the waypoint
     mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
     msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True)
-    while msg_nav.wp_dist > 0:
-        mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
-        msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True)
-        print 'Waypoint Distance: ' + str(msg_nav.wp_dist)
-    print 'Waypoint reached!'
 
-    # wait 3 seconds, then capture an image from the GoPro
-    print 'Waiting 3 seconds...'
-    time.sleep(3)
-    img = gpc.getImage('SARSGoPro', 'sarsgopro')
-    if img:
-        im = Image.open('image.png')
-        pix = im.load()
-        imgs.append(pix)
-        print('Image download succeeded!')
-    else:
-        failed = True
-        print('Image download failed. Abort mission.')
+    if current_seq == 2 or current_seq == 32 or current_seq == 62:
+        while msg_nav.wp_dist > 0:
+            mvlnk.param_fetch_one(name='NAV_CONTROLLER_OUTPUT')
+            msg_nav = mvlnk.recv_match(type='NAV_CONTROLLER_OUTPUT', blocking=True)
+            print 'Waypoint Distance: ' + str(msg_nav.wp_dist)
+        print 'Waypoint reached!'
+
+        # wait 3 seconds, then capture an image from the GoPro
+        print 'Waiting 3 seconds...'
+        time.sleep(3)
+        img = gpc.getImage('SARSGoPro', 'sarsgopro')
+        if img:
+            im = Image.open('image.png')
+            pix = im.load()
+            imgs.append(pix)
+            print('Image download succeeded!')
+        else:
+            failed = True
+            print('Image download failed. Abort mission.')
 
     # wait for the sequence number to increment
     incremented = False
@@ -76,7 +78,7 @@ while not failed and in_waypoint_seq:
             incremented = True
             print 'Sequence number incremented! Current Sequence Number: ' + str(current_seq)
 
-    if current_seq > MAX_WP_SEQ:
+    if current_seq >= MAX_WP_SEQ:
         in_waypoint_seq = False
         print 'All waypoints visited!'
 
