@@ -21,25 +21,25 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
         self.isRunning = False
 
         # establish a connection the quadcopter
-        # print 'Opening telemetry radio connection...'
-        # self.quad = None
-        # for i in range(0,5):
-        #     tty = '/dev/ttyUSB' + str(i)
-        #     try:
-        #         self.quad = mavutil.mavlink_connection(device=tty, baud=57600)
-        #     except:
-        #         print 'No telemetry radio on ' + tty
-        #     if self.quad:
-        #         print 'Telemetry radio found on ' + tty
-        #         break
-        # if self.quad is None:
-        #     print 'Could not open telemetry radio connection'
-        #     return
+        print 'Opening telemetry radio connection...'
+        self.quad = None
+        for i in range(0,5):
+            tty = '/dev/ttyUSB' + str(i)
+            try:
+                self.quad = mavutil.mavlink_connection(device=tty, baud=57600)
+            except:
+                print 'No telemetry radio on ' + tty
+            if self.quad:
+                print 'Telemetry radio found on ' + tty
+                break
+        if self.quad is None:
+            print 'Could not open telemetry radio connection'
+            return
 
         # min and max sequence number
         # determines when to start and stop capturing images
-        # self.quad.MIN_WP_SEQ = 1
-        # self.quad.MAX_WP_SEQ = 90
+        self.quad.MIN_WP_SEQ = 1
+        self.quad.MAX_WP_SEQ = 90
 
         # CC3100 connection information
         self.host = '192.168.1.1'
@@ -47,8 +47,8 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
 
         # set up the GoProController object used for pulling static images
         # Ethernet Adapter is wlan0; USB Wi-Fi Adapter is wlan1
-        # self.gpc = GoProController(device_name='wlan0')
-        # self.gpc.connect('SARSGoPro', 'sarsgopro')
+        self.gpc = GoProController(device_name='wlan0')
+        self.gpc.connect('SARSGoPro', 'sarsgopro')
 
         # set up the Detector object for testing images pulled from the GoPro
         self.det = Detector()
@@ -106,7 +106,7 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
     def setupTelemetry(self):
         """Set up the telemetry timer, signals & slots"""
         self.telemTimer = QtCore.QTimer(self)
-        self.telemTimer.setInterval(500)
+        self.telemTimer.setInterval(1000)
         self.connect(self.telemTimer, QtCore.SIGNAL('timeout()'), self.updateTelemetry)
         self.telemTimer.start()
 
@@ -176,16 +176,16 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
     def updateTelemetry(self):
         """updates the quadcopter and rover telemetry information"""
         # get quadcopter telemetry
-        # self.quad.gpi = self.quad.recv_match(type='GLOBAL_POSITION_INT', blocking=False)
-        # if self.quad.gpi is not None:
-        #     self.plainTextEditTelemetry.setPlainText('Quadcopter:')
-        #     self.plainTextEditTelemetry.appendPlainText('Latitude:\t\t' + str(self.quad.gpi.lat / 10000000.0))
-        #     self.plainTextEditTelemetry.appendPlainText('Longitude:\t\t' + str(self.quad.gpi.lon / 10000000.0))
-        #     self.plainTextEditTelemetry.appendPlainText('Heading:\t\t' + str(self.quad.gpi.hdg / 100.0))
-        #     self.plainTextEditTelemetry.appendPlainText('Altitude:\t\t' + str(self.quad.gpi.relative_alt / 1000.0))
-        #     self.plainTextEditTelemetry.appendPlainText('Velocity (X):\t' + str(self.quad.gpi.vx))
-        #     self.plainTextEditTelemetry.appendPlainText('Velocity (Y):\t' + str(self.quad.gpi.vy))
-        #     self.plainTextEditTelemetry.appendPlainText('Velocity (Z):\t' + str(self.quad.gpi.vz))
+        self.quad.gpi = self.quad.recv_match(type='GLOBAL_POSITION_INT', blocking=False)
+        if self.quad.gpi is not None:
+            self.plainTextEditTelemetry.setPlainText('Quadcopter:')
+            self.plainTextEditTelemetry.appendPlainText('Latitude:\t\t' + str(self.quad.gpi.lat / 10000000.0))
+            self.plainTextEditTelemetry.appendPlainText('Longitude:\t\t' + str(self.quad.gpi.lon / 10000000.0))
+            self.plainTextEditTelemetry.appendPlainText('Heading:\t\t' + str(self.quad.gpi.hdg / 100.0))
+            self.plainTextEditTelemetry.appendPlainText('Altitude:\t\t' + str(self.quad.gpi.relative_alt / 1000.0))
+            self.plainTextEditTelemetry.appendPlainText('Velocity (X):\t' + str(self.quad.gpi.vx))
+            self.plainTextEditTelemetry.appendPlainText('Velocity (Y):\t' + str(self.quad.gpi.vy))
+            self.plainTextEditTelemetry.appendPlainText('Velocity (Z):\t' + str(self.quad.gpi.vz))
 
         # get rover telemetry
         self.rover_speed = self.sendTCP('s')
@@ -223,29 +223,27 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
         elif cmd == 'sendwp1':
             self.plainTextEditMissionStatus.appendPlainText('Sending Waypoint 1 to the Rover...')
             msg = self.sendTCP('1')
-            self.plainTextEditMissionStatus.appendPlainText(msg)
+            self.plainTextEditMissionStatus.appendPlainText('Rover status: ' + msg)
         elif cmd == 'sendwp2':
             self.plainTextEditMissionStatus.appendPlainText('Sending Waypoint 2 to the Rover...')
             msg = self.sendTCP('2')
-            self.plainTextEditMissionStatus.appendPlainText(msg)
+            self.plainTextEditMissionStatus.appendPlainText('Rover status: ' + msg)
         elif cmd == 'sendwp3':
             self.plainTextEditMissionStatus.appendPlainText('Sending Waypoint 3 to the Rover...')
             msg = self.sendTCP('3')
-            self.plainTextEditMissionStatus.appendPlainText(msg)
+            self.plainTextEditMissionStatus.appendPlainText('Rover status: ' + msg)
         elif cmd == 'sendwp4':
             self.plainTextEditMissionStatus.appendPlainText('Sending Waypoint 4 to the Rover...')
             msg = self.sendTCP('4')
-            self.plainTextEditMissionStatus.appendPlainText(msg)
+            self.plainTextEditMissionStatus.appendPlainText('Rover status: ' + msg)
         elif cmd == 'sendwp5':
             self.plainTextEditMissionStatus.appendPlainText('Sending Waypoint 5 to the Rover...')
             msg = self.sendTCP('5')
-            self.plainTextEditMissionStatus.appendPlainText(msg)
+            self.plainTextEditMissionStatus.appendPlainText('Rover status: ' + msg)
         elif cmd == 'sendwp6':
             self.plainTextEditMissionStatus.appendPlainText('Sending Waypoint 6 to the Rover...')
             msg = self.sendTCP('6')
-            self.plainTextEditMissionStatus.appendPlainText(msg)
-        elif cmd == 'close':
-            self.socket.close()
+            self.plainTextEditMissionStatus.appendPlainText('Rover status: ' + msg)
         else:
             self.plainTextEditMissionStatus.appendPlainText('Unrecognized command.')
         self.lineEditCommandConsole.setText('')
@@ -351,21 +349,21 @@ class cdc(QtGui.QMainWindow, cdcui.Ui_MainWindow):
                 self.isRunning = False
 
     def sendTCP(self, str):
-        s = socket.socket()
-        QtGui.QApplication.processEvents()
-        s.connect((self.host, self.port))
-        QtGui.QApplication.processEvents()
-        s.send(str)
-        QtGui.QApplication.processEvents()
-        QtGui.QApplication.processEvents()
-        QtGui.QApplication.processEvents()
-        msg = s.recv(2**10)
-        QtGui.QApplication.processEvents()
-        msg = msg.rstrip()
-        QtGui.QApplication.processEvents()
-        s.close()
-        QtGui.QApplication.processEvents()
-        return msg
+        try:
+            s = socket.socket()
+            s.connect((self.host, self.port))
+            s.settimeout(0.5)
+            s.send(str)
+            for i in range (0,500):
+                time.sleep(0.001)
+                QtGui.QApplication.processEvents()
+            msg = s.recv(2**10)
+            QtGui.QApplication.processEvents()
+            msg = msg.rstrip()
+            s.close()
+            return msg
+        except Exception as e:
+            print e
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
